@@ -1,0 +1,104 @@
+import tkinter
+from tkinter import ttk
+from tkinter import messagebox
+from matplotlib import pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+def is_float(value):
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+def bmi():
+
+    w=weightentry.get()
+    w=int(w)
+    h=heightentry.get()
+    if not is_float(h):
+        tkinter.messagebox.showerror(title='Input Error', message='Please enter numeric values for weight and height.')
+        return
+    h=float(h)
+    fname=fnameentry.get()
+    age=agespinbox.get()
+
+    b=w/h**2
+    if b<18.5:
+        category='Underweight'
+        tkinter.messagebox.showinfo(title='BMI',message='Underweight')
+    elif b<25:
+        category='Normal'
+        tkinter.messagebox.showinfo(title='BMI',message='Normal')
+    elif b<30:
+        category='Overweight'
+        tkinter.messagebox.showinfo(title='BMI', message='Overweight')
+    else:
+        category='Obese'
+        tkinter.messagebox.showinfo(title='BMI', message='obese')
+    #bmi_result_label.config(text='BMI: %.2f - %s' % (b, category))
+    with open('peopleinfo.txt', 'a') as fwrite:
+     fwrite.write(fname+' '+ str(age)+' '+ str(w)+' '+ str(h)+' ' + category+'\n')
+
+def draw():
+    categories = {"Underweight": 0, "Normal": 0, "Overweight": 0, "Obese": 0}
+
+    with open('peopleinfo.txt', 'r') as myfile:
+        for line in myfile:
+            if 'Underweight' in line:
+                categories['Underweight'] += 1
+            elif 'Normal' in line:
+                categories['Normal'] += 1
+            elif 'Overweight' in line:
+                categories['Overweight'] += 1
+            elif 'Obese' in line:
+                categories['Obese'] += 1
+
+    labels = []
+    numbers = []
+    for cat, count in categories.items():
+        labels.append(cat)
+        numbers.append(count)
+
+    colors = ['lightblue', 'lightgreen', 'yellow', 'lightcoral']
+    fig1,ax1=plt.subplots()
+    ax1.pie(numbers, labels=labels, autopct='%1.1f%%', colors=colors, startangle=140)
+    plt.axis('equal')
+    plt.title('BMI Categories Distribution')
+    #plt.show()
+    canvas = FigureCanvasTkAgg(fig1, master=plot_frame)
+    canvas.draw()
+    canvas.get_tk_widget().pack()
+
+window=tkinter.Tk()
+window.title('BMI Category')
+frame=tkinter.Frame(window)
+frame.pack()
+userinfoframe=tkinter.LabelFrame(frame,text='User Information')
+userinfoframe.grid(row=0,column=0)
+fnamelabel=tkinter.Label(userinfoframe,text='First Name')
+fnamelabel.grid(row=0,column=0)
+fnameentry=tkinter.Entry(userinfoframe)
+fnameentry.grid(row=0,column=1)
+agelabel=tkinter.Label(userinfoframe,text='Age')
+agespinbox=tkinter.Spinbox(userinfoframe,from_=18,to=50)
+agelabel.grid(row=0,column=2)
+agespinbox.grid(row=0,column=3)
+bmiinfo=tkinter.LabelFrame(frame,text='BMI Inputs')
+bmiinfo.grid(row=1,column=0)
+weightlabel=tkinter.Label(bmiinfo,text='Weight(KG)')
+weightlabel.grid(row=0,column=0)
+weightentry=tkinter.Entry(bmiinfo)
+weightentry.grid(row=0,column=1)
+heightlabel=tkinter.Label(bmiinfo,text='Height(M)')
+heightlabel.grid(row=0,column=2)
+heightentry=tkinter.Entry(bmiinfo)
+heightentry.grid(row=0,column=3)
+bmibtn=tkinter.Button(frame,text='BMI',command=bmi)
+bmibtn.grid(row=2,column=0)
+#bmi_result_label=tkinter.Label(frame,text='BMI:')
+#bmi_result_label.grid(row=3,column=0)
+bmigrbtn=tkinter.Button(frame,text='BMI Graph',command=draw)
+bmigrbtn.grid(row=4,column=0)
+plot_frame = tkinter.Frame(frame)
+plot_frame.grid(row=5, column=0)
+window.mainloop()
